@@ -2,6 +2,8 @@
 
 var logger = require('../utils').logger;
 
+var userModel = require('../models/user');
+
 var authService = {};
 
 /**
@@ -14,6 +16,10 @@ var authService = {};
  */
 authService.createUser = function(user, cb) {
   logger.debug('auth-service: creating user', {email: user.email, password: user.password});
+
+  var userToStore = userModel.createUser(user.email, user.password);
+  logger.debug('auth-service: storing user', {user: userToStore});
+
   process.nextTick(cb);
 };
 
