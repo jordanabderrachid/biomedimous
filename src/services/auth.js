@@ -20,7 +20,7 @@ authService.createUser = function(user, cb) {
   var userToStore = userModel.createUser(user.email, user.password);
   logger.debug('auth-service: storing user', {user: userToStore});
 
-  process.nextTick(cb);
+  userModel.save(userToStore, cb);
 };
 
 /**
