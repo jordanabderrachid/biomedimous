@@ -31,13 +31,13 @@ authController.authenticateUser = function(req, res) {
     password: req.body.password
   };
 
-  authService.authenticateUser(user, function(err) {
+  authService.authenticateUser(user, function(err, token) {
     if (err) {
       res.status(401).end();
       return;
     }
 
-    res.status(200).end();
+    res.status(200).end(token);
   });
 };
 

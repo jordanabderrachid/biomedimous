@@ -3,6 +3,7 @@
 var logger = require('../utils').logger;
 
 var userModel = require('../models/user');
+var tokenStore = require('../stores/token');
 
 var authService = {};
 
@@ -58,13 +59,20 @@ authService.authenticateUser = function(user, cb) {
         return;
       }
 
-      logger.debug('auth-service', {
-        process: 'authenticateUser',
-        result: 'success',
-        email: user.email,
-        password: user.password
+      tokenStore.addUser(foundUser, function(err, token) {
+        if (err) {
+          cb(err);
+          return;
+        }
+
+        logger.debug('auth-service', {
+          process: 'authenticateUser',
+          result: 'success',
+          email: user.email,
+          password: user.password
+        });
+        cb(null, token);
       });
-      cb();
     });
   });
 };
