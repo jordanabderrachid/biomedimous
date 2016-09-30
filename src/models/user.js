@@ -5,6 +5,7 @@ var crypto = require('crypto');
 var dynamodbMarshaler = require('dynamodb-marshaler');
 
 var dynamodb = require('../providers/dynamodb');
+var logger = require('../utils').logger;
 
 var SALT_SIZE_IN_BYTES = 32; // bytes
 var SALT_DIGEST_TYPE = 'hex';
@@ -66,6 +67,63 @@ userModel.save = function(user, cb) {
 
     cb(err);
   });
+};
+
+/**
+ * Get the user by it's username, if the user don't exist, the callback is
+ * called without user.
+ *
+ * @param {String} email - the email of the user
+ * @param {Function} cb - the callback function
+ */
+userModel.getUser = function(email, cb) {
+  var params = {
+    TableName: USER_TABLE_NAME,
+    Key: {
+      'email': {
+        'S': email
+      }
+    },
+    ConsistentRead: true,
+    ReturnConsumedCapacity: 'NONE'
+  };
+
+  dynamodb.getItem(params, function(err, data) {
+    if (err) {
+      logger.error('user-model: fail to get user', err);
+    }
+
+    if (!data.Item) {
+      cb(new Error('user-model: no user found'));
+      return;
+    }
+
+    cb(err, dynamodbMarshaler.unmarshalItem(data.Item));
+  });
+};
+
+/**
+ * Verify if the provided password is correct. If the password is correct, the
+ * callback is executed with the value `true`.
+ *
+ * @param {User} user - the user
+ * @param {String} password - the password
+ * @param {Function} cb - the callback function
+ */
+userModel.verifyPassword = function(user, password, cb) {
+  var passwordSalted = password + user.salt;
+
+  var hasher = crypto.createHash(HASH_TYPE);
+
+  hasher.update(passwordSalted);
+  var passwordHash = hasher.digest(HASH_DIGEST_TYPE);
+
+  var passwordMatch = false;
+  if (user.passwordHash === passwordHash) {
+    passwordMatch = true;
+  }
+
+  process.nextTick(cb.bind(null, null, passwordMatch));
 };
 
 module.exports = userModel;

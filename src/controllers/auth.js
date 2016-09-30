@@ -5,7 +5,6 @@ var authService = require('../services/auth');
 var authController = {};
 
 authController.createUser = function(req, res) {
-  // TODO Check if the request body is valid.
   var user = {
     email: req.body.email,
     password: req.body.password
@@ -22,7 +21,11 @@ authController.createUser = function(req, res) {
 };
 
 authController.authenticateUser = function(req, res) {
-  // TODO Check if the request body is valid.
+  if (!req.body.email || !req.body.password) {
+      res.status(400).end();
+      return;
+  }
+
   var user = {
     email: req.body.email,
     password: req.body.password
@@ -30,7 +33,7 @@ authController.authenticateUser = function(req, res) {
 
   authService.authenticateUser(user, function(err) {
     if (err) {
-      res.status(500).end();
+      res.status(401).end();
       return;
     }
 

@@ -15,10 +15,17 @@ var authService = {};
  * @param {Function} cb - the callback function
  */
 authService.createUser = function(user, cb) {
-  logger.debug('auth-service: creating user', {email: user.email, password: user.password});
+  logger.debug('auth-service', {
+    process: 'creatingUser',
+    email: user.email,
+    password: user.password
+  });
 
   var userToStore = userModel.createUser(user.email, user.password);
-  logger.debug('auth-service: storing user', {user: userToStore});
+  logger.debug('auth-service', {
+    process: 'storingUser',
+    user: userToStore
+  });
 
   userModel.save(userToStore, cb);
 };
@@ -32,8 +39,34 @@ authService.createUser = function(user, cb) {
  * @param {Function} cb - the callback function
  */
 authService.authenticateUser = function(user, cb) {
-  logger.debug('auth-service: authenticating user', {email: user.email, password: user.password});
-  process.nextTick(cb);
+  logger.debug('auth-service', {
+    process: 'authenticateUser',
+    result: 'started',
+    email: user.email,
+    password: user.password
+  });
+
+  userModel.getUser(user.email, function(err, foundUser) {
+    if (err || !foundUser) {
+      cb(new Error('auth-service: fail to get user'));
+      return;
+    }
+
+    userModel.verifyPassword(foundUser, user.password, function(err, passwordCorrect) {
+      if (err || !passwordCorrect) {
+        cb(new Error('auth-service: invalid password'));
+        return;
+      }
+
+      logger.debug('auth-service', {
+        process: 'authenticateUser',
+        result: 'success',
+        email: user.email,
+        password: user.password
+      });
+      cb();
+    });
+  });
 };
 
 module.exports = authService;
