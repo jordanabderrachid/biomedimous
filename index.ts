@@ -8,6 +8,7 @@ app.use(bodyParser.json());
 
 app.use('/api', apiRoutes);
 
-app.listen(8080, () => {
-  console.log('server running on 8080');
+const port = process.env['PORT'] || 8080;
+app.listen(port, () => {
+  console.log('server running on ' + port);
 });
