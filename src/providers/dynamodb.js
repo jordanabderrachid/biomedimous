@@ -1,28 +1,19 @@
-'use strict';
-
-var aws = require('aws-sdk');
-
-var config = require('../config');
-var logger = require('../utils').logger;
-
-var dynamodb;
-
-var createInstance = function() {
-  logger.info('DynamoDB: using version %s and region %s',
-    config.DYNAMODB.VERSION, config.DYNAMODB.REGION);
-
-  return new aws.DynamoDB({
-    apiVersion: config.DYNAMODB.VERSION,
-    region: config.DYNAMODB.REGION
-  });
-};
-
-var getInstance = function() {
-  if (typeof dynamodb === 'undefined') {
-    dynamodb = createInstance();
-  }
-
-  return dynamodb;
-};
-
-module.exports = getInstance();
+"use strict";
+var aws_sdk_1 = require('aws-sdk');
+var DYNAMODB_REGION = 'eu-west-1';
+var DYNAMODB_VERSION = '2012-08-10';
+var instance;
+function createInstance() {
+    return new aws_sdk_1.DynamoDB.DocumentClient({
+        apiVersion: DYNAMODB_VERSION,
+        region: DYNAMODB_REGION
+    });
+}
+function getInstance() {
+    if (!instance) {
+        instance = createInstance();
+    }
+    return instance;
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = getInstance();
