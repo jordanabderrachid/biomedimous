@@ -52,7 +52,7 @@ function validateUserRequestBody(body: any): boolean {
     return false;
   }
 
-  if (body.hasOwnProperty('email') || body.hasOwnProperty('password')) {
+  if (!body.hasOwnProperty('email') || !body.hasOwnProperty('password')) {
     return false;
   }
 
