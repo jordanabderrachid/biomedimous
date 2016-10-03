@@ -3,7 +3,7 @@ import User from '../models/user';
 
 const USER_TABLE_NAME = 'biomedimous-users';
 
-export function save(user: User, cb: (err: Error | null) => void): void {
+function save(user: User, cb: (err: Error | null) => void): void {
   const params = {
       TableName: USER_TABLE_NAME,
       Item: user.toJSON()
@@ -20,7 +20,7 @@ export function save(user: User, cb: (err: Error | null) => void): void {
   });
 }
 
-export function get(email: string, cb: (err: Error | null, user?: User) => void): void {
+function get(email: string, cb: (err: Error | null, user?: User) => void): void {
   const params = {
     TableName: USER_TABLE_NAME,
     Key: {
@@ -35,7 +35,7 @@ export function get(email: string, cb: (err: Error | null, user?: User) => void)
     }
 
     if (!data.Item) {
-      cb(new Error('user-service: user not found'));
+      cb(null);
       return;
     }
 
@@ -46,4 +46,21 @@ export function get(email: string, cb: (err: Error | null, user?: User) => void)
 export function createUser(email: string, password: string, cb: (err: Error | null) => void): void {
   const user = new User(email, password);
   save(user, cb);
+}
+
+export function authenticate(email: string, password: string, cb: (err: Error | null, user?: User) => void): void {
+  get(email, (err, user) => {
+    if (err) {
+      console.log(err);
+      cb(new Error('user-service: failed to get user'));
+      return;
+    }
+
+    if (!user || !user.checkPassword(password)) {
+      cb(null);
+      return;
+    }
+
+    cb(null, user);
+  });
 }

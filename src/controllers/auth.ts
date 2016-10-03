@@ -19,6 +19,27 @@ export const createUser = function(req: Request & ParsedAsJson, res: Response, n
   });
 }
 
+export const authenticateUser = function(req: Request & ParsedAsJson, res: Response, next: NextFunction): any {
+  if (!validateUserRequestBody(req.body)) {
+    res.status(400).end();
+    return;
+  }
+
+  userService.authenticate(req.body.email, req.body.password, (err, user) => {
+    if (err) {
+      res.status(500).end();
+      return;
+    }
+
+    if (!user) {
+      res.status(401).end();
+      return;
+    }
+
+    res.status(200).end();
+  });
+}
+
 function validateUserRequestBody(body: any): boolean {
   if (!(body instanceof Object)) {
     return false;
