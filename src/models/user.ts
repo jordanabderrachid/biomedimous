@@ -36,7 +36,7 @@ class User {
     const hash = crypto.createHash(HASH_ALGORITHM);
     hash.update(password + salt);
 
-    return hash.digest().toString();
+    return hash.digest().toString(HASH_DIGEST_TYPE);
   }
 
   private setSalt(salt: string): void {
