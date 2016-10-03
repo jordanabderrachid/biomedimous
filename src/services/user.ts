@@ -1,4 +1,5 @@
 import dynamodb from '../providers/dynamodb';
+import tokenStore from '../stores/token';
 import User from '../models/user';
 
 const USER_TABLE_NAME = 'biomedimous-users';
@@ -62,5 +63,16 @@ export function authenticate(email: string, password: string, cb: (err: Error | 
     }
 
     cb(null, user);
+  });
+}
+
+export function createToken(user: User, cb: (err: Error | null, token?: string) => void): void {
+  tokenStore.addUser(user, (err, token) => {
+    if (err || !token) {
+      cb(new Error('user-service: failed to create token'));
+      return;
+    }
+
+    cb(null, token);
   });
 }

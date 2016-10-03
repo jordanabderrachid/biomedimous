@@ -36,7 +36,14 @@ export const authenticateUser = function(req: Request & ParsedAsJson, res: Respo
       return;
     }
 
-    res.status(200).end();
+    userService.createToken(user, (err, token) => {
+      if (err || !token) {
+        res.status(500).end();
+        return;
+      }
+
+      res.status(200).end(token);
+    });
   });
 }
 
